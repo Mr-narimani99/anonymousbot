@@ -3,18 +3,22 @@ from peewee import Model, CharField, IntegerField, AutoField, BigIntegerField, T
 from datetime import datetime
 from pyrogram.types import Message
 
+db_name = 'mybot_db'
+db_user = 'mohammad'
+db_pass = 'Mr.mrn1041378'
+db_host_ip = '192.168.253.129'
 db = MySQLDatabase(
-    database= 'mybot_db',  # Replace with your database name
-    user='mohammad',
-    password='Mr.mrn1041378',
-    host='192.168.253.129',
+    database = db_name ,  # Replace with your database name
+    user = db_user,
+    password = db_pass,
+    host=db_host_ip,
     port=3306   
 )
    
 try:
     class User(Model):
         username = CharField(unique=True,max_length=32)
-        id = IntegerField()
+        id = BigIntegerField(unique=True)
         link =CharField(unique=True)
         joined_date =CharField()       
         class Meta:
