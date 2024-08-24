@@ -7,10 +7,11 @@ from pytz import timezone
 from MySQLDatabase import db, User
 from MySQLDatabase import Message as db_Message
 logging.basicConfig(level=logging.DEBUG)
-bot_id = "myfchatbot"
-api_id = 27561080
-api_hash = "f3eaaf759cbabd85281cf299669110e0"
-bot_token = "7493225528:AAHm1ttLQdiKaHtozifsD88qiW6wGAQKQVM"
+
+bot_id = ""
+api_id = 
+api_hash = ""
+bot_token = ""
 proxy = {
      "scheme": "http",
      "hostname": "127.0.0.1",
