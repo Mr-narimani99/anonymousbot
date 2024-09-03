@@ -6,7 +6,7 @@ from pyrogram.types import Message
 db_name = 'mybot_db'
 db_user = 'mohammad'
 db_pass = 'Mr.mrn1041378'
-db_host_ip = '192.168.253.129'
+db_host_ip = 'mysql'
 db = MySQLDatabase(
     database = db_name ,  # Replace with your database name
     user = db_user,

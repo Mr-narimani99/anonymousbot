@@ -2,22 +2,25 @@ from peewee import OperationalError
 from pyrogram import Client, filters
 from pyrogram.types import Message,InlineKeyboardButton,InlineKeyboardMarkup,ReplyKeyboardMarkup,KeyboardButton,CallbackQuery
 from pyrogram.handlers import MessageHandler
-import asyncio, logging, random, datetime
+import asyncio, logging, random, datetime, json
 from pytz import timezone
 from MySQLDatabase import db, User
 from MySQLDatabase import Message as db_Message
 logging.basicConfig(level=logging.DEBUG)
+with open('config.json', 'r') as file:
+    config = json.load(file)
 
-bot_id = ""
-api_id = 
-api_hash = ""
-bot_token = ""
+bot_id = config['bot_id']
+api_id = config['api_id']
+api_hash = config['api_hash']
+bot_token = config['bot_token']
+
 proxy = {
      "scheme": "http",
      "hostname": "127.0.0.1",
      "port": 2081
  }
-app = Client("my_botn", api_id=int(api_id), api_hash=api_hash,bot_token=bot_token,proxy=proxy)
+app = Client("my_botn", api_id=int(api_id), api_hash=api_hash,bot_token=bot_token)
 async def check_db(username, id, link):
     print("Checking db")
     try:
@@ -119,6 +122,7 @@ async def link(client, cbq:CallbackQuery):
     await client.send_message(user_states[user_id][1]["from"],text=f"{cbq.from_user.first_name}پیام شما را خواند")
     key7 = InlineKeyboardButton("در صورتی که میخواهید پاسخی ارسال کنید بر روی دکمه زیر کلیک کنید:  ",url=user_link)
     await cbq.edit_message_text(text=f"{response} \n ار سال پاسخ :\n ",reply_markup = InlineKeyboardMarkup([[key7]]))
+    
     del user_states[cbq.from_user.id]
 
 
@@ -147,4 +151,5 @@ async def hi(client, cbq:CallbackQuery):
 
 logging.info("debug logiing:")
 app.run()
+
 

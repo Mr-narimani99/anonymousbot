@@ -1,0 +1,37 @@
+services:
+  bot:
+    build: .
+    image: mybot:v1.1
+    container_name: mybot
+    environment:
+      - DB_HOST='localhost'
+      - DB_USER='mohammad'
+      - DB_PASSWORD='Mr.mrn1041378'
+      - DB_NAME='mybot_db'
+    depends_on:
+      - mysql
+    ports:
+      - "5000:5000"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'    # Limit to 50% of a single CPU
+          memory: 512M
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 'Mr.mrn1041378'
+      MYSQL_DATABASE: 'mybot_db'
+      MYSQL_USER: 'mohammad'
+      MYSQL_PASSWORD: 'Mr.mrn1041378'
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+volumes:
+  mysql-data:
+networks:
+  mynetwork:
