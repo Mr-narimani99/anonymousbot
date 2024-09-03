@@ -4,7 +4,7 @@ services:
     image: mybot:v1.1
     container_name: mybot
     environment:
-      - DB_HOST='localhost'
+      - DB_HOST='mysql'
       - DB_USER='mohammad'
       - DB_PASSWORD='Mr.mrn1041378'
       - DB_NAME='mybot_db'
@@ -29,7 +29,7 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      - mysql-data:/var/lib/mysql
+      - /var/lib/mysqlbot:/var/lib/mysql
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
 volumes:
   mysql-data:

@@ -4,7 +4,7 @@ from pyrogram.types import Message,InlineKeyboardButton,InlineKeyboardMarkup,Rep
 from pyrogram.handlers import MessageHandler
 import asyncio, logging, random, datetime, json
 from pytz import timezone
-from MySQLDatabase import db, User
+from MySQLDatabase import db, User, create_table, table_exists
 from MySQLDatabase import Message as db_Message
 logging.basicConfig(level=logging.DEBUG)
 with open('config.json', 'r') as file:
@@ -14,13 +14,21 @@ bot_id = config['bot_id']
 api_id = config['api_id']
 api_hash = config['api_hash']
 bot_token = config['bot_token']
+if table_exists():
+    print("Table  exists.")
+else:
+    print("Table does not exist.")
+    db.close()
+    create_table()
+# Close the database connection
+db.close()
 
 proxy = {
      "scheme": "http",
      "hostname": "127.0.0.1",
      "port": 2081
  }
-app = Client("my_botn", api_id=int(api_id), api_hash=api_hash,bot_token=bot_token)
+app = Client("my_botn", api_id=int(api_id), api_hash=api_hash,bot_token=bot_token,proxy=proxy)
 async def check_db(username, id, link):
     print("Checking db")
     try:
@@ -120,9 +128,8 @@ async def link(client, cbq:CallbackQuery):
     user_id_str="".join(random.choices("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",k=10))
     user_link=f"https://t.me/{bot_id}?start={user_id_str}"
     await client.send_message(user_states[user_id][1]["from"],text=f"{cbq.from_user.first_name}پیام شما را خواند")
-    key7 = InlineKeyboardButton("در صورتی که میخواهید پاسخی ارسال کنید بر روی دکمه زیر کلیک کنید:  ",url=user_link)
-    await cbq.edit_message_text(text=f"{response} \n ار سال پاسخ :\n ",reply_markup = InlineKeyboardMarkup([[key7]]))
-    
+    key7 = InlineKeyboardButton("  ار سال پاسخ ",url=user_link)
+    await cbq.edit_message_text(text=f"{response} \n\n در صورتی که میخواهید پاسخی ارسال کنید بر روی دکمه زیر کلیک کنید:\n ",reply_markup = InlineKeyboardMarkup([[key7]]))
     del user_states[cbq.from_user.id]
 
 
@@ -149,7 +156,7 @@ async def hi(client, cbq:CallbackQuery):
 
 
 
-logging.info("debug logiing:")
+logging.info("debug loging:")
 app.run()
 
 
