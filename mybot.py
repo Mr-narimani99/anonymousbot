@@ -2,7 +2,7 @@ from peewee import OperationalError
 from pyrogram import Client, filters
 from pyrogram.types import Message,InlineKeyboardButton,InlineKeyboardMarkup,ReplyKeyboardMarkup,KeyboardButton,CallbackQuery
 from pyrogram.handlers import MessageHandler
-import asyncio, logging, random, datetime, json
+import asyncio, logging, random, time, datetime, json
 from pytz import timezone
 from MySQLDatabase import db, User, create_table, table_exists
 from MySQLDatabase import Message as db_Message
@@ -28,7 +28,7 @@ proxy = {
      "hostname": "127.0.0.1",
      "port": 2081
  }
-app = Client("my_botn", api_id=int(api_id), api_hash=api_hash,bot_token=bot_token,proxy=proxy)
+app = Client("my_botn", api_id=int(api_id), api_hash=api_hash,bot_token=bot_token)
 async def check_db(username, id, link):
     print("Checking db")
     try:
@@ -121,17 +121,15 @@ async def handle_reply(client, message: Message):
 @app.on_callback_query(filters.regex("read_message"))
 async def link(client, cbq:CallbackQuery):
     user_id = cbq.from_user.id
-    print(f"this is read_message{cbq.from_user.id}")
-    print(f"this is read_message user states {user_states}")
     response=user_states[user_id][1]["message"]
     random.seed(user_states[user_id][1]["from"])
     user_id_str="".join(random.choices("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",k=10))
     user_link=f"https://t.me/{bot_id}?start={user_id_str}"
     await client.send_message(user_states[user_id][1]["from"],text=f"{cbq.from_user.first_name}پیام شما را خواند")
     key7 = InlineKeyboardButton("  ار سال پاسخ ",url=user_link)
-    await cbq.edit_message_text(text=f"{response} \n\n در صورتی که میخواهید پاسخی ارسال کنید بر روی دکمه زیر کلیک کنید:\n ",reply_markup = InlineKeyboardMarkup([[key7]]))
+    await cbq.edit_message_text(text=f"{response} \n")
+    await client.send_message(user_id,text=f" در صورتی که میخواهید پاسخی ارسال کنید بر روی دکمه زیر کلیک کنید:\n ",reply_markup = InlineKeyboardMarkup([[key7]]))
     del user_states[cbq.from_user.id]
-
 
 @app.on_callback_query(filters.regex("mylink"))
 async def link(client, cbq:CallbackQuery):
