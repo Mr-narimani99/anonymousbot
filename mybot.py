@@ -61,6 +61,7 @@ async def check_db(username, id, link):
         print("connection closed")
 
 user_states = {}
+user_recieve_states = {}
 def link_creator(id:int):
     random.seed(id)
     user_str="".join(random.choices("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",k=10))
@@ -73,7 +74,7 @@ key4 = InlineKeyboardButton("اتصال به ناشناس",callback_data="/comma
 key1 = InlineKeyboardButton("لینک ناشناس من",callback_data="/mylink")
 key2 = InlineKeyboardButton("پروفایل ناشناس من",callback_data="/command2")
 key5 = InlineKeyboardButton(" بازگشت به منوی اصلی",callback_data="/backtostart")
-key6 = InlineKeyboardButton("خواندن پیام",callback_data="/read_message")
+
 
 @app.on_message(filters.regex("^/start$"))
 async def start(client, message):
@@ -106,39 +107,46 @@ async def start(client, message):
 @app.on_message(filters.text)
 async def handle_reply(client, message: Message):
     user_id = message.from_user.id
+    msg_id=message.msg_id
     if user_id in user_states and user_states[user_id][0] == "waiting_for_reply":
-        if len(user_states[user_id])>1 :
-            print(user_states[user_id])
-            user_response = message.text
-            user_states[user_states[user_id][1]["to"]]=["have_message",{"from":user_id,"message":user_response}]
-            await message.reply(f"پیام شما دریافت و ارسال شد:\n {user_response}")
-            await client.send_message(user_states[user_id][1]["to"],text=f"یک پیام جدید از {message.from_user.first_name} داری ",reply_markup = InlineKeyboardMarkup([[key6]]))
-            print(user_states)
-            print(user_states[user_id])
-            del user_states[user_id]
-            print(user_states)
+        print(user_states[user_id])
+        user_response = message.text
+        if user_states[user_id][1]["to"] in user_recieve_states[user_states[user_id][1]["to"]] :
+            user_recieve_states[user_states[user_id][1]["to"]][1]["messages"].append(msg_id)
+            user_recieve_states[user_states[user_id][1]["to"]][1]["messages"].append(user_response)
+        else:
+            user_recieve_states[user_states[user_id][1]["to"]]=["have_message",{"from":user_id,"messages":[msg_id,user_response]}]
+        await message.reply(f"پیام شما دریافت و ارسال شد:\n {user_response}")
+        key6 = InlineKeyboardButton("خواندن پیام",callback_data=f"/read_message `` {msg_id}")
+        await client.send_message(user_states[user_id][1]["to"],text=f"یک پیام ناشناس جدید داری ",reply_markup = InlineKeyboardMarkup([[key6]]))
+        print(user_states)
+        print(user_states[user_id])
+        del user_states[user_id]
+        print(user_states)
 
 @app.on_callback_query(filters.regex("read_message"))
 async def link(client, cbq:CallbackQuery):
     user_id = cbq.from_user.id
-    response=user_states[user_id][1]["message"]
-    random.seed(user_states[user_id][1]["from"])
-    user_id_str="".join(random.choices("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",k=10))
-    user_link=f"https://t.me/{bot_id}?start={user_id_str}"
+    msg_id = cbq.data.split(" `` ")[1]#this comes from the bottom and must delete a msg that its id is msg_id
+    msg_index=user_recieve_states[user_id][1]["messages"].index(msg_id)
+    response=user_recieve_states[user_id][1]["messages"][msg_index+1]
+    user_link=link_creator(user_states[user_id][1]["from"])[0]
     await client.send_message(user_states[user_id][1]["from"],text=f"{cbq.from_user.first_name}پیام شما را خواند")
     key7 = InlineKeyboardButton("  ار سال پاسخ ",url=user_link)
     await cbq.edit_message_text(text=f"{response} \n")
     await client.send_message(user_id,text=f" در صورتی که میخواهید پاسخی ارسال کنید بر روی دکمه زیر کلیک کنید:\n ",reply_markup = InlineKeyboardMarkup([[key7]]))
-    del user_states[cbq.from_user.id]
+    if msg_index==0:
+        del user_recieve_states[user_id]
+    else:
+        del user_recieve_states[user_id][1]["messages"][msg_index:msg_index+2]
+
 
 @app.on_callback_query(filters.regex("mylink"))
 async def link(client, cbq:CallbackQuery):
     chat_id=cbq.from_user.id
     print(f"this is command5{chat_id}")
+    user_link=link_creator(chat_id)[0]
     chat_name=cbq.from_user.first_name
-    random.seed(chat_id)
-    user_id="".join(random.choices("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",k=10))
-    user_link=f"https://t.me/{bot_id}?start={user_id}"
     keyboard = InlineKeyboardMarkup([[key1,key2],[key3,key4]])
     invite_text=f""" سلام {chat_name} هستم \nلینک زیر رو لمس کن و هر حرفی که تو دلت هست یا هر انتقادی که نسبت به من داری رو با خیال راحت بنویس و بفرست. بدون اینکه از اسمت باخبر بشم پیامت به من می‌رسه. خودتم می‌تونی امتحان کنی و از بقیه بخوای راحت و ناشناس بهت پیام بفرستن، حرفای خیلی جالبی می‌شنوی! 😉\n\n {user_link}"""
     await cbq.edit_message_text(text=invite_text,reply_markup = keyboard)
