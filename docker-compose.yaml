@@ -1,7 +1,7 @@
 services:
   bot:
     build: .
-    image: mybot:v1.1
+    image: mybot:v1.2
     container_name: mybot
     environment:
       - DB_HOST='mysql'
